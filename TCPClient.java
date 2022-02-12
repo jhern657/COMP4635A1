@@ -21,7 +21,7 @@ public class TCPClient {
 		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
 		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-		System.out.println("Please enter the line you would like decrypted: ");
+		System.out.println("Please enter level and failed attempts factor: ");
 		sentence = inFromUser.readLine();
 		
 		while (sentence.toLowerCase().compareTo("exit") != 0) {

@@ -19,27 +19,13 @@ public class TCPServer {
 		String currentSentence = ""; // current sentence we are decrypting.
 		Map<String, String> codebook = new HashMap<>(); // codebook used to decrypt.
 		char current; 
-
+		Game current_session;
 		ServerSocket welcomeSocket = new ServerSocket(6789);
 
 		while (true) {
 			String line; // This first part is just handling the input loading of the codebook .
-			BufferedReader reader = new BufferedReader(new FileReader("codebook.txt"));
+			BufferedReader reader = new BufferedReader(new FileReader("words.txt"));
 			line = reader.readLine();
-			while (line != null) // codebook will have to be in the format of [code]'\t'[translation]'\n' for this to work.
-		    {
-		        String[] parts = line.split("\t", 2);
-		        if (parts.length >= 2)
-		        {
-		            String key = parts[0];
-		            String value = parts[1];
-		            codebook.put(key, value);
-		        } else {
-		            System.out.println("ignoring line: " + line);
-		        }
-		        line = reader.readLine();
-		    }
-
 			Socket connectionSocket = welcomeSocket.accept(); // We are establishing connection here. 
 			BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
 			DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
@@ -50,49 +36,16 @@ public class TCPServer {
 			try {
 				while (true) {
 					clientSentence = inFromClient.readLine(); // grabs input from client side and makes is capital.
-					capitalSentence = clientSentence.toUpperCase();
-					Character[] clientSentenceChars = 
-							capitalSentence.chars().mapToObj(c -> (char)c).toArray(Character[]::new); // turns string into char array
 					
-					for(int i=0; i < clientSentenceChars.length; i++) {
-						current = clientSentenceChars[i];
-						
-						if(isPunctuation(current)) {						
-							outputSentence = needsSpace(outputSentence);
-							if(codebook.get(currentSentence) == null) {
-								outputSentence += currentSentence + current;
-							}
-							else {	
-								outputSentence += codebook.get(currentSentence) + clientSentenceChars[i];
-							}
-							currentSentence = "";
-						}
-						
-						else if(current == ' ' && codebook.get(currentSentence)!= null) {
-							outputSentence = needsSpace(outputSentence);
-							outputSentence += codebook.get(currentSentence);
-							currentSentence = "";
-						}
-						
-						else if(isInput(current)) {
-								currentSentence += current;
-						}
-						else {
-							if(currentSentence != "") {
-								outputSentence = needsSpace(outputSentence);
-							}
-							outputSentence += currentSentence;
-							currentSentence = "";
-						}
-					}
-					
-					if(outputSentence!="") {
+					if(firstWord(clientSentence).equals("start")) {
 
-						outToClient.writeBytes(outputSentence + '\n'); // return translated message
-						outputSentence = "";
+						int level=Integer.parseInt(clientSentence.split(" ")[1]);
+						int failed_attempts=Integer.parseInt(clientSentence.split(" ")[2]);
+						current_session = new Game(level, failed_attempts);
+						
 					}
 					else {
-						outToClient.writeBytes(clientSentence + " (undecrypted)" + '\n'); // return if input is not part of codebook.
+						outToClient.writeBytes(clientSentence); // return if input is not part of codebook.
 						
 					}
 				}
@@ -106,6 +59,13 @@ public class TCPServer {
 
 	}
 		
+	
+	// Method that returns the first word
+	public static String firstWord(String input) {
+	    return input.split(" ")[0]; // Create array of words and return the 0th word
+	}	
+	
+	
 		/** isPunctuation
 		 * @param character
 		 * @return true, if character is considered Punctuation, false otherwise.
