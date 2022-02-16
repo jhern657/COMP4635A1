@@ -11,6 +11,7 @@ public class Game {
 	String line;
 	RandomAccessFile reader;
 	String phrase;
+	public String hidden;
 
 
 	static final int NUM_OF_WORDS = 240000;
@@ -25,10 +26,10 @@ public class Game {
 		}
 
 		phrase = assemble_phrase(level, reader);
-		hide_phrase(phrase);
-
+		hidden = hide_phrase(phrase);
+		
+		System.out.println(hidden);
 		System.out.println("phrase = " + phrase);
-
 	}
 
 	//asks for i(level) random words from the word repository,
@@ -67,27 +68,40 @@ public class Game {
 	}
 
 	// hide words behind '-' and show failed attempt counter
-	public void hide_phrase(String phrase) {
+	public String hide_phrase(String phrase) {
 
 	    char[] letters = phrase.toCharArray();
+	    System.out.println(phrase);
+	    StringBuilder hidden = new StringBuilder();
+	    f_a_counter = level * failed_attempts;
 
 	    for (int i=0; i < letters.length; i++) {
 
-	        switch(letters[i]) {
-	            case ' ': //check if current char is a space
-	                System.out.print(" ");
-	                i++;
-	            case '\n': //check if current char is a newline character
-	                i++;
-	            default:
-	                System.out.print("-"); //replace each character with -
+//	        switch(letters[i]) {
+//	            case ' ': //check if current char is a space
+//	                System.out.print(" ");
+//	                i++;
+//	            case '\n': //check if current char is a newline character
+//	                i++;
+//	            default:
+//	                System.out.print("-"); //replace each character with -
+	              
+	    	if(letters[i] == ' ') {
+	    		
+	             hidden.append(" ");   
+	                
+	        } else if(letters[i] != '\n') {
+	        	hidden.append("-");
+	        } else {
+	        	// set failed attempt counter
+	        	hidden.append("C" + f_a_counter + '\n');
 	        }
 
 	    }
 
-	    f_a_counter = level * failed_attempts;
+	    
 
-	    System.out.println("C"+f_a_counter); // set failed attempt counter
+	     return hidden.toString();
 
 	}
 
