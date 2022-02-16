@@ -19,8 +19,12 @@ public class TCPServer {
 		String currentSentence = ""; // current sentence we are decrypting.
 		Map<String, String> codebook = new HashMap<>(); // codebook used to decrypt.
 		char current; 
-		Game current_session;
+		Game current_session = null;
 		ServerSocket welcomeSocket = new ServerSocket(6789);
+		
+		// Default game settings
+		int level = 1;
+		int failed_attempts = 1;
 
 		while (true) {
 			String line; // This first part is just handling the input loading of the codebook .
@@ -31,24 +35,40 @@ public class TCPServer {
 			DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
 			System.out.println("Accepted TCP connection from" 
 					+ connectionSocket.getInetAddress() 
-					+ ":" + connectionSocket.getPort());			    	
+					+ ":" + connectionSocket.getPort());
+			
+			
 		
 			try {
 				while (true) {
 					clientSentence = inFromClient.readLine(); // grabs input from client side and makes is capital.
 					
+					
+					
 					if(firstWord(clientSentence).equals("start")) {
 
-						int level=Integer.parseInt(clientSentence.split(" ")[1]);
-						int failed_attempts=Integer.parseInt(clientSentence.split(" ")[2]);
+						level=Integer.parseInt(clientSentence.split(" ")[1]);
+						failed_attempts=Integer.parseInt(clientSentence.split(" ")[2]);
 						current_session = new Game(level, failed_attempts);
 						
 						outToClient.writeBytes(current_session.hidden);
 						
+						
+					} 
+					else if (clientSentence.equals("*")) {
+						current_session = new Game(level, failed_attempts);
+						
+						outToClient.writeBytes(current_session.hidden);
+					} else if (firstWord(clientSentence).equals("?")) {
+						
 					}
 					else {
-						outToClient.writeBytes(clientSentence); // return if input is not part of codebook.
+						//outToClient.writeBytes(clientSentence); // return if input is not part of codebook.
 						
+						// Handle character guess
+						current_session.guess(clientSentence.charAt(0));
+						
+						outToClient.writeBytes(current_session.hidden);
 					}
 				}
 			} catch (Exception e) {

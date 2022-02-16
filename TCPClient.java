@@ -24,7 +24,7 @@ public class TCPClient {
 		System.out.println("Please enter level and failed attempts factor: ");
 		sentence = inFromUser.readLine();
 		
-		while (sentence.toLowerCase().compareTo("exit") != 0) {
+		while (sentence.toLowerCase().compareTo(".") != 0) {
 			outToServer.writeBytes(sentence + '\n');
 
 			modifiedSentence = inFromServer.readLine();

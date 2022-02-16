@@ -1,6 +1,7 @@
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Game {
@@ -106,6 +107,32 @@ public class Game {
 	}
 
 
+	public void guess(char letter) {
+		
+		char[] letters = phrase.toCharArray();
+		StringBuilder updated = new StringBuilder();
+		
+		if(!phrase.contains(String.valueOf(letter))) {
+			f_a_counter--;
+		} else {
+			
+			// Goes through phrase
+			for(int i = 0; i < phrase.length(); i++) {
+			    
+				if(letters[i] == letter) {
+					// Copy letter to hidden
+					updated.append(letter);
+					
+				} else {
+					updated.append(hidden.charAt(i));
+				}
+			}
+			
+			hidden = updated.append('\n').toString();
+		}
+		
+		return;
+	}
 
 
 }
