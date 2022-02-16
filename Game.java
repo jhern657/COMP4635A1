@@ -2,7 +2,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -22,6 +21,8 @@ public class Game {
 	public Game(int input_level, int input_failed_attempts) {
 		level = input_level;
 		failed_attempts = input_failed_attempts;
+		f_a_counter = level * failed_attempts;
+
 		try {
 			reader = new RandomAccessFile("words.txt", "r");
 		} catch (FileNotFoundException e) {
@@ -29,8 +30,9 @@ public class Game {
 		}
 
 		phrase = assemble_phrase(level, reader);
+
 		hidden = hide_phrase(phrase);
-		
+
 		System.out.println(hidden);
 		System.out.println("phrase = " + phrase);
 	}
@@ -76,91 +78,100 @@ public class Game {
 	    char[] letters = phrase.toCharArray();
 	    System.out.println(phrase);
 	    StringBuilder hidden = new StringBuilder();
-	    f_a_counter = level * failed_attempts;
+	    String words = "";
 
 	    for (int i=0; i < letters.length; i++) {
 
-//	        switch(letters[i]) {
-//	            case ' ': //check if current char is a space
-//	                System.out.print(" ");
-//	                i++;
-//	            case '\n': //check if current char is a newline character
-//	                i++;
-//	            default:
-//	                System.out.print("-"); //replace each character with -
-	              
 	    	if(letters[i] == ' ') {
-	    		
-	             hidden.append(" ");   
-	                
+
+	             hidden.append(" ");
+
 	        } else if(letters[i] != '\n') {
 	        	hidden.append("-");
-	        } else {
+	        }
+	        else {
 	        	// set failed attempt counter
-	        	hidden.append("C" + f_a_counter + '\n');
+	            words = update_counter(hidden.toString());
+//	        	hidden.append("C" + f_a_counter + '\n');
 	        }
 
 	    }
 
-	    
-
-	     return hidden.toString();
+	     return words;
 
 	}
 
+	public String update_counter(String hidden) {
+
+	    StringBuilder hidden_copy = new StringBuilder();
+
+	    for(int i = 0; i < hidden.length()-1; i++) {
+	        hidden_copy.append(hidden.charAt(i));
+	    }
+
+	    //need to replace append with .replace to override the C counter
+	    hidden_copy.append("C" + f_a_counter + "\n");
+
+	    hidden = hidden_copy.toString();
+
+	    return hidden;
+	}
 
 	public void guess(char letter) {
-		
+
 		char[] letters = phrase.toCharArray();
 		StringBuilder updated = new StringBuilder();
-		
+
 		if(!phrase.contains(String.valueOf(letter))) {
 			f_a_counter--;
+			hidden = update_counter(hidden);
+
 		} else {
-			
+
 			// Goes through phrase
-			for(int i = 0; i < phrase.length(); i++) {
-			    
-				if(letters[i] == letter) {
+			for(int i = 0; i < hidden.length() ; i++) {
+
+				if(i < phrase.length() && letters[i] == letter) {
 					// Copy letter to hidden
 					updated.append(letter);
-					
+
 				} else {
 					updated.append(hidden.charAt(i));
 				}
 			}
-			
+
+
 			hidden = updated.append('\n').toString();
 		}
-		
+
 		return;
 	}
-	
+
 	public String word_lookup(String word) {
-		
+
 		try {
-		
+
 		Scanner scanner = new Scanner(new File("words.txt"));
 		String currentLine;
 
 		while(scanner.hasNextLine())
 		{
 			currentLine = scanner.nextLine();
-			
+
 		    if(currentLine.contains(word))
 		    {
 		         return "Word found!";
 		    }
 		}
-		
+
 		scanner.close();
-		
+
 		} catch (Exception e) {
 			System.out.println("Exception!" + e);
 		}
-		
+
 		return "Not found!";
-		
+
 	}
 
 
