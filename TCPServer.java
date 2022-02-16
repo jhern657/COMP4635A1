@@ -59,8 +59,13 @@ public class TCPServer {
 						current_session = new Game(level, failed_attempts);
 						
 						outToClient.writeBytes(current_session.hidden);
-					} else if (firstWord(clientSentence).equals("?")) {
+					} 
+					else if (clientSentence.charAt(0) == '?') {
+						String word = clientSentence.substring(1);
 						
+						String message = current_session.word_lookup(word);
+						
+						outToClient.writeBytes(message + '\n');
 					}
 					else {
 						//outToClient.writeBytes(clientSentence); // return if input is not part of codebook.

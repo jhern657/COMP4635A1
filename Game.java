@@ -1,8 +1,10 @@
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Game {
 
@@ -132,6 +134,33 @@ public class Game {
 		}
 		
 		return;
+	}
+	
+	public String word_lookup(String word) {
+		
+		try {
+		
+		Scanner scanner = new Scanner(new File("words.txt"));
+		String currentLine;
+
+		while(scanner.hasNextLine())
+		{
+			currentLine = scanner.nextLine();
+			
+		    if(currentLine.contains(word))
+		    {
+		         return "Word found!";
+		    }
+		}
+		
+		scanner.close();
+		
+		} catch (Exception e) {
+			System.out.println("Exception!" + e);
+		}
+		
+		return "Not found!";
+		
 	}
 
 
