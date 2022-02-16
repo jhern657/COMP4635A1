@@ -43,6 +43,8 @@ public class TCPServer {
 						int failed_attempts=Integer.parseInt(clientSentence.split(" ")[2]);
 						current_session = new Game(level, failed_attempts);
 						
+						outToClient.writeBytes(current_session.hidden);
+						
 					}
 					else {
 						outToClient.writeBytes(clientSentence); // return if input is not part of codebook.
