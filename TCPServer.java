@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Angela
@@ -15,11 +17,14 @@ public class TCPServer {
 	public static void main(String argv[]) throws Exception {
 
 		ServerSocket welcomeSocket = new ServerSocket(6789);
+		welcomeSocket.setReuseAddress(true);
 
 		while (true) {
 			BufferedReader reader = new BufferedReader(new FileReader("words.txt"));
 
+
 			try {
+			    ExecutorService gameThread = Executors.newFixedThreadPool(20);
 
 	          while (true) {
 	              Socket connectionSocket = welcomeSocket.accept(); // We are establishing connection here.
@@ -29,17 +34,12 @@ public class TCPServer {
 
 	              ReverseEchoClientHandler echo = new ReverseEchoClientHandler(connectionSocket);
 
-	              Thread gameThread = new Thread(echo);
+	              gameThread.execute(echo);
 
-	              gameThread.start();
-
-	              gameThread.join();
 
 				}
 
-			}catch (InterruptedException e) {
-                System.out.println("Failed to join threads");
-            }
+			}
 			catch (IOException e) {
 	            System.out.println(
 	                    "Exception caught when trying to listen on port " + welcomeSocket + " or listening for a connection");

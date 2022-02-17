@@ -65,7 +65,6 @@ public class Game {
 			}
 		}
 
-
 		return phrase.append("\n").toString();
 
 	}
@@ -97,6 +96,7 @@ public class Game {
 
 	}
 
+	// update game counter string value sent to the client
 	public String update_counter(String hidden) {
 
 	    StringBuilder hidden_copy = new StringBuilder();
@@ -114,6 +114,7 @@ public class Game {
 	    return hidden;
 	}
 
+	// update game counter based on wrong guesses, reveals where correct character guess is, if counter == 0 lets client know they lost the round
 	public void guess(char letter) {
 
 		char[] letters = phrase.toCharArray();
@@ -150,6 +151,7 @@ public class Game {
 		return;
 	}
 
+	// if client guesses word correctly
 	public void guess(String word) {
 
 	    word = word + "\n";
@@ -163,6 +165,7 @@ public class Game {
 	    }
 	}
 
+	// looks through the word file and checks if word found
 	public String word_lookup(String word) {
 
 		try {
