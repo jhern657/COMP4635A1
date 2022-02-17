@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Angela 
+ * @author Angela
  *
  */
 public class TCPServer {
@@ -18,10 +18,10 @@ public class TCPServer {
 		String outputSentence = ""; // This is the decrypted sentence.
 		String currentSentence = ""; // current sentence we are decrypting.
 		Map<String, String> codebook = new HashMap<>(); // codebook used to decrypt.
-		char current; 
+		char current;
 		Game current_session = null;
 		ServerSocket welcomeSocket = new ServerSocket(6789);
-		
+
 		// Default game settings
 		int level = 1;
 		int failed_attempts = 1;
@@ -30,50 +30,54 @@ public class TCPServer {
 			String line; // This first part is just handling the input loading of the codebook .
 			BufferedReader reader = new BufferedReader(new FileReader("words.txt"));
 			line = reader.readLine();
-			Socket connectionSocket = welcomeSocket.accept(); // We are establishing connection here. 
+			Socket connectionSocket = welcomeSocket.accept(); // We are establishing connection here.
 			BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
 			DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
-			System.out.println("Accepted TCP connection from" 
-					+ connectionSocket.getInetAddress() 
+			System.out.println("Accepted TCP connection from"
+					+ connectionSocket.getInetAddress()
 					+ ":" + connectionSocket.getPort());
-			
-			
-		
+
+
+
 			try {
 				while (true) {
 					clientSentence = inFromClient.readLine(); // grabs input from client side and makes is capital.
-					
-					
-					
+
 					if(firstWord(clientSentence).equals("start")) {
 
 						level=Integer.parseInt(clientSentence.split(" ")[1]);
 						failed_attempts=Integer.parseInt(clientSentence.split(" ")[2]);
 						current_session = new Game(level, failed_attempts);
-						
+
 						outToClient.writeBytes(current_session.hidden);
-						
-						
-					} 
+
+
+					}
 					else if (clientSentence.equals("*")) {
 						current_session = new Game(level, failed_attempts);
-						
+
 						outToClient.writeBytes(current_session.hidden);
-					} 
+					}
 					else if (clientSentence.charAt(0) == '?') {
+
+
 						String word = clientSentence.substring(1);
-						
+
 						String message = current_session.word_lookup(word);
-						
+
 						outToClient.writeBytes(message + '\n');
 					}
-					else {
-						//outToClient.writeBytes(clientSentence); // return if input is not part of codebook.
-						
+					else if (clientSentence.length() == 1){ // handles one letter guesses
+
 						// Handle character guess
 						current_session.guess(clientSentence.charAt(0));
-						
+
 						outToClient.writeBytes(current_session.hidden);
+					}
+					else { //handles whole word guesses
+					    current_session.guess(clientSentence);
+
+					    outToClient.writeBytes(current_session.hidden);
 					}
 				}
 			} catch (Exception e) {
@@ -85,14 +89,14 @@ public class TCPServer {
 		}
 
 	}
-		
-	
+
+
 	// Method that returns the first word
 	public static String firstWord(String input) {
 	    return input.split(" ")[0]; // Create array of words and return the 0th word
-	}	
-	
-	
+	}
+
+
 		/** isPunctuation
 		 * @param character
 		 * @return true, if character is considered Punctuation, false otherwise.
@@ -100,7 +104,7 @@ public class TCPServer {
 		public static boolean isPunctuation(char character) {
 			return (((character >= '!' && character <= '.') || (character >= ':' && character <= '@')) && character != '/');
 	}
-		
+
 		/** needsSpace
 		 * @param outputSentence
 		 * @return returns original string with an added space if needed.
@@ -113,13 +117,13 @@ public class TCPServer {
 			}
 			return outputSentence;
 		}
-		
+
 		/**isInput
-		 * @param character 
+		 * @param character
 		 * @return true, if character is translatable input, false otherwise
 		 */
 		public static boolean isInput(char character) {
 			return (Character.isDigit(character) || Character.isUpperCase(character) || character == '/');
 		}
-		
+
 }
