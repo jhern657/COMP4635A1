@@ -1,11 +1,11 @@
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.SocketException;
 
 /**
  * @author Angela
@@ -13,80 +13,129 @@ import java.util.Map;
  */
 public class TCPServer {
 	public static void main(String argv[]) throws Exception {
-		String clientSentence; // This is original sentence from the client.
-		String capitalSentence;
-		String outputSentence = ""; // This is the decrypted sentence.
-		String currentSentence = ""; // current sentence we are decrypting.
-		Map<String, String> codebook = new HashMap<>(); // codebook used to decrypt.
-		char current;
-		Game current_session = null;
+
 		ServerSocket welcomeSocket = new ServerSocket(6789);
 
-		// Default game settings
-		int level = 1;
-		int failed_attempts = 1;
-
 		while (true) {
-			String line; // This first part is just handling the input loading of the codebook .
 			BufferedReader reader = new BufferedReader(new FileReader("words.txt"));
-			line = reader.readLine();
-			Socket connectionSocket = welcomeSocket.accept(); // We are establishing connection here.
-			BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
-			DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
-			System.out.println("Accepted TCP connection from"
-					+ connectionSocket.getInetAddress()
-					+ ":" + connectionSocket.getPort());
-
-
 
 			try {
-				while (true) {
-					clientSentence = inFromClient.readLine(); // grabs input from client side and makes is capital.
 
-					if(firstWord(clientSentence).equals("start")) {
+	          while (true) {
+	              Socket connectionSocket = welcomeSocket.accept(); // We are establishing connection here.
+	              System.out.println("Accepted TCP connection from"
+	                      + connectionSocket.getInetAddress()
+	                      + ":" + connectionSocket.getPort());
 
-						level=Integer.parseInt(clientSentence.split(" ")[1]);
-						failed_attempts=Integer.parseInt(clientSentence.split(" ")[2]);
-						current_session = new Game(level, failed_attempts);
+	              ReverseEchoClientHandler echo = new ReverseEchoClientHandler(connectionSocket);
 
-						outToClient.writeBytes(current_session.hidden);
+	              Thread gameThread = new Thread(echo);
 
+	              gameThread.start();
 
-					}
-					else if (clientSentence.equals("*")) {
-						current_session = new Game(level, failed_attempts);
+	              gameThread.join();
 
-						outToClient.writeBytes(current_session.hidden);
-					}
-					else if (clientSentence.charAt(0) == '?') {
-
-
-						String word = clientSentence.substring(1);
-
-						String message = current_session.word_lookup(word);
-
-						outToClient.writeBytes(message + '\n');
-					}
-					else if (clientSentence.length() == 1){ // handles one letter guesses
-
-						// Handle character guess
-						current_session.guess(clientSentence.charAt(0));
-
-						outToClient.writeBytes(current_session.hidden);
-					}
-					else { //handles whole word guesses
-					    current_session.guess(clientSentence);
-
-					    outToClient.writeBytes(current_session.hidden);
-					}
 				}
-			} catch (Exception e) {
+
+			}catch (InterruptedException e) {
+                System.out.println("Failed to join threads");
+            }
+			catch (IOException e) {
+	            System.out.println(
+	                    "Exception caught when trying to listen on port " + welcomeSocket + " or listening for a connection");
+	            System.out.println(e.getMessage());
+	        }
+			catch (Exception e) {
 				// TODO: handle exception, if client closed connection, print:
 				System.out.println("Client closed connection.");
 			}
+
 			welcomeSocket.close();
 			reader.close();
 		}
+
+	}
+
+
+	//handle multiple players simultaneously
+	private static class ReverseEchoClientHandler implements Runnable{
+	    private Socket clientSocket;
+
+        public ReverseEchoClientHandler(Socket socket) {
+            this.clientSocket = socket;
+        }
+
+        @Override
+        public void run() {
+            String clientSentence; // This is original sentence from the client.
+            Game current_session = null;
+
+         // Default game settings
+            int level = 1;
+            int failed_attempts = 1;
+
+            System.out.println("Connected, handling new client: " + clientSocket);
+
+            try {
+                BufferedReader inFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                DataOutputStream outToClient = new DataOutputStream(clientSocket.getOutputStream());
+
+                // run game
+                while(true) {
+
+                    clientSentence = inFromClient.readLine(); // grabs input from client side and makes is capital.
+
+                    if(firstWord(clientSentence).equals("start")) {
+
+                        level=Integer.parseInt(clientSentence.split(" ")[1]);
+                        failed_attempts=Integer.parseInt(clientSentence.split(" ")[2]);
+                        current_session = new Game(level, failed_attempts);
+
+                        outToClient.writeBytes(current_session.hidden);
+
+
+                    }
+                    else if (clientSentence.equals("*")) {
+
+                        current_session = new Game(level, failed_attempts);
+                        outToClient.writeBytes(current_session.hidden);
+
+                    }
+                    else if (clientSentence.charAt(0) == '?') {
+
+                        String word = clientSentence.substring(1);
+                        String message = current_session.word_lookup(word);
+                        outToClient.writeBytes(message + '\n');
+
+                    }
+                    else if (clientSentence.length() == 1){ // handles one letter guesses
+
+                        // Handle character guess
+                        current_session.guess(clientSentence.charAt(0));
+                        outToClient.writeBytes(current_session.hidden);
+                    }
+                    else { //handles whole word guesses
+                        current_session.guess(clientSentence);
+                        outToClient.writeBytes(current_session.hidden);
+                    }
+
+                }
+
+            } catch (SocketException e) {
+                System.out.println("Error: " + e.getMessage());
+            }catch (NullPointerException e) {
+                System.out.println("Game Ended");
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    clientSocket.close();
+                } catch (IOException e) {
+                }
+                System.out.println("Closed: " + clientSocket);
+            }
+        }
 
 	}
 
