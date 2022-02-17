@@ -15,7 +15,6 @@ public class Game {
 	String phrase;
 	public String hidden;
 
-
 	static final int NUM_OF_WORDS = 240000;
 
 	public Game(int input_level, int input_failed_attempts) {
@@ -30,7 +29,6 @@ public class Game {
 		}
 
 		phrase = assemble_phrase(level, reader);
-
 		hidden = hide_phrase(phrase);
 
 		System.out.println(hidden);
@@ -78,7 +76,6 @@ public class Game {
 	    char[] letters = phrase.toCharArray();
 	    System.out.println(phrase);
 	    StringBuilder hidden = new StringBuilder();
-	    String words = "";
 
 	    for (int i=0; i < letters.length; i++) {
 
@@ -91,13 +88,12 @@ public class Game {
 	        }
 	        else {
 	        	// set failed attempt counter
-	            words = update_counter(hidden.toString());
-//	        	hidden.append("C" + f_a_counter + '\n');
+	            hidden.append("C" + f_a_counter + "\n");
 	        }
 
 	    }
 
-	     return words;
+	     return hidden.toString();
 
 	}
 
@@ -105,12 +101,13 @@ public class Game {
 
 	    StringBuilder hidden_copy = new StringBuilder();
 
-	    for(int i = 0; i < hidden.length()-1; i++) {
+	    for(int i = 0; i < hidden.length(); i++) {
+
 	        hidden_copy.append(hidden.charAt(i));
+
 	    }
 
-	    //need to replace append with .replace to override the C counter
-	    hidden_copy.append("C" + f_a_counter + "\n");
+	    hidden_copy.replace(hidden.lastIndexOf("C"), hidden.lastIndexOf("\n"), "C" + Integer.toString(f_a_counter));
 
 	    hidden = hidden_copy.toString();
 
@@ -124,7 +121,13 @@ public class Game {
 
 		if(!phrase.contains(String.valueOf(letter))) {
 			f_a_counter--;
+
 			hidden = update_counter(hidden);
+
+			if(f_a_counter == 0) {
+
+			    hidden = "Lost this round! :( score = 0 \n";
+			}
 
 		} else {
 
@@ -140,11 +143,24 @@ public class Game {
 				}
 			}
 
-
-			hidden = updated.append('\n').toString();
+			//might be setting \n too much here
+			hidden = updated.toString();
 		}
 
 		return;
+	}
+
+	public void guess(String word) {
+
+	    word = word + "\n";
+
+	    if(!phrase.equals(word)) {
+	        f_a_counter--;
+	        hidden = update_counter(hidden);
+	    }
+	    else {
+	        hidden = "You guessed it right! :) score = " + f_a_counter + "\n";
+	    }
 	}
 
 	public String word_lookup(String word) {
