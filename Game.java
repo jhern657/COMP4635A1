@@ -5,6 +5,11 @@ import java.io.RandomAccessFile;
 import java.util.Random;
 import java.util.Scanner;
 
+/**
+ * 
+ * @author Janel Hernandez, Matt Smith, Angela Li
+ *
+ */
 public class Game {
 
 	int level;
@@ -15,7 +20,7 @@ public class Game {
 	String phrase;
 	public String hidden;
 
-	static final int NUM_OF_WORDS = 240000;
+	static final int NUM_OF_BYTES = 240000; // Number of bytes in word.txt
 
 	public Game(int input_level, int input_failed_attempts) {
 		level = input_level;
@@ -40,14 +45,14 @@ public class Game {
 	public static String assemble_phrase(int level, RandomAccessFile reader) {
 
 		Random random = new Random();
-		int randomNum = random.nextInt(NUM_OF_WORDS);
+		int randomNum = random.nextInt(NUM_OF_BYTES);
 		StringBuilder phrase = new StringBuilder();
 
 		for(int i = 0; i < level; i++) {
 			// Grab one word and append it to the phrase
 			try {
 				// Move to a random spot
-				randomNum = random.nextInt(NUM_OF_WORDS);
+				randomNum = random.nextInt(NUM_OF_BYTES);
 				reader.seek(randomNum);
 
 				// Read until end of word

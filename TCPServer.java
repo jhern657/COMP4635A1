@@ -10,49 +10,48 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * @author Angela
+ * @author Angela Li, Janel Hernandez, Matt Smith
  *
  */
 public class TCPServer {
 	public static void main(String argv[]) throws Exception {
-
-		ServerSocket serverSocket = new ServerSocket(6789);
-		serverSocket.setReuseAddress(true);
-
-		while (true) {
-			BufferedReader reader = new BufferedReader(new FileReader("words.txt"));
-
-
-			try {
-			    ExecutorService gameThread = Executors.newFixedThreadPool(20);
-
-	          while (true) {
-	              Socket clientConnectionSocket = serverSocket.accept(); // We are establishing connection here.
-	              System.out.println("Accepted TCP connection from"
-	                      + clientConnectionSocket.getInetAddress()
-	                      + ":" + clientConnectionSocket.getPort());
-
-	              GameClientHandler echo = new GameClientHandler(clientConnectionSocket);
-
-	              gameThread.execute(echo);
-
-
-				}
-
-			}
-			catch (IOException e) {
-	            System.out.println(
-	                    "Exception caught when trying to listen on port " + serverSocket + " or listening for a connection");
-	            System.out.println(e.getMessage());
-	        }
-			catch (Exception e) {
-				// TODO: handle exception, if client closed connection, print:
-				System.out.println("Client closed connection.");
-			}
-
-			serverSocket.close();
-			reader.close();
+		// Check command line arguments
+		if(argv.length != 1) {
+			System.out.println("USAGE: java TCPServer [port]");
+			System.exit(1);
 		}
+
+		ServerSocket serverSocket = null;
+		int port = 0; // 6789 
+		
+
+		try {
+			ExecutorService gameThread = Executors.newFixedThreadPool(20);
+			port = Integer.parseInt(argv[0]);
+			serverSocket = new ServerSocket(port);
+			serverSocket.setReuseAddress(true);
+
+			while (true) {
+				Socket clientConnectionSocket = serverSocket.accept(); // We are establishing connection here.
+				System.out.println("Accepted TCP connection from" + clientConnectionSocket.getInetAddress() + ":"
+						+ clientConnectionSocket.getPort());
+
+				GameClientHandler echo = new GameClientHandler(clientConnectionSocket);
+
+				gameThread.execute(echo);
+
+			}
+
+		} catch (IOException e) {
+			System.out.println("Exception caught when trying to listen on port " + serverSocket
+					+ " or listening for a connection");
+			System.out.println(e.getMessage());
+		} catch (Exception e) {
+			// TODO: handle exception, if client closed connection, print:
+			System.out.println("Client closed connection.");
+		}
+
+		serverSocket.close();
 
 	}
 
