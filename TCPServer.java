@@ -94,13 +94,13 @@ public class TCPServer {
 
 
                     }
-                    else if (clientSentence.equals("*")) {
+                    else if (clientSentence.equals("*") || current_session.f_a_counter == 0) {
 
                         current_session = new Game(level, failed_attempts);
                         outToClient.writeBytes(current_session.hidden);
 
                     }
-                    else if (clientSentence.charAt(0) == '?') {
+                    else if (clientSentence.length() > 1 && clientSentence.charAt(0) == '?') {
 
                         String word = clientSentence.substring(1);
                         String message = current_session.word_lookup(word);
