@@ -16,8 +16,8 @@ import java.util.concurrent.Executors;
 public class TCPServer {
 	public static void main(String argv[]) throws Exception {
 
-		ServerSocket welcomeSocket = new ServerSocket(6789);
-		welcomeSocket.setReuseAddress(true);
+		ServerSocket serverSocket = new ServerSocket(6789);
+		serverSocket.setReuseAddress(true);
 
 		while (true) {
 			BufferedReader reader = new BufferedReader(new FileReader("words.txt"));
@@ -27,12 +27,12 @@ public class TCPServer {
 			    ExecutorService gameThread = Executors.newFixedThreadPool(20);
 
 	          while (true) {
-	              Socket connectionSocket = welcomeSocket.accept(); // We are establishing connection here.
+	              Socket clientConnectionSocket = serverSocket.accept(); // We are establishing connection here.
 	              System.out.println("Accepted TCP connection from"
-	                      + connectionSocket.getInetAddress()
-	                      + ":" + connectionSocket.getPort());
+	                      + clientConnectionSocket.getInetAddress()
+	                      + ":" + clientConnectionSocket.getPort());
 
-	              ReverseEchoClientHandler echo = new ReverseEchoClientHandler(connectionSocket);
+	              GameClientHandler echo = new GameClientHandler(clientConnectionSocket);
 
 	              gameThread.execute(echo);
 
@@ -42,7 +42,7 @@ public class TCPServer {
 			}
 			catch (IOException e) {
 	            System.out.println(
-	                    "Exception caught when trying to listen on port " + welcomeSocket + " or listening for a connection");
+	                    "Exception caught when trying to listen on port " + serverSocket + " or listening for a connection");
 	            System.out.println(e.getMessage());
 	        }
 			catch (Exception e) {
@@ -50,7 +50,7 @@ public class TCPServer {
 				System.out.println("Client closed connection.");
 			}
 
-			welcomeSocket.close();
+			serverSocket.close();
 			reader.close();
 		}
 
@@ -58,10 +58,10 @@ public class TCPServer {
 
 
 	//handle multiple players simultaneously
-	private static class ReverseEchoClientHandler implements Runnable{
+	private static class GameClientHandler implements Runnable{
 	    private Socket clientSocket;
 
-        public ReverseEchoClientHandler(Socket socket) {
+        public GameClientHandler(Socket socket) {
             this.clientSocket = socket;
         }
 
@@ -144,35 +144,4 @@ public class TCPServer {
 	public static String firstWord(String input) {
 	    return input.split(" ")[0]; // Create array of words and return the 0th word
 	}
-
-
-		/** isPunctuation
-		 * @param character
-		 * @return true, if character is considered Punctuation, false otherwise.
-		 */
-		public static boolean isPunctuation(char character) {
-			return (((character >= '!' && character <= '.') || (character >= ':' && character <= '@')) && character != '/');
-	}
-
-		/** needsSpace
-		 * @param outputSentence
-		 * @return returns original string with an added space if needed.
-		 */
-		public static String needsSpace(String outputSentence) {
-			if(outputSentence != "") {
-				if( outputSentence.substring(outputSentence.length() - 1) != " ") {
-					outputSentence += " ";
-				}
-			}
-			return outputSentence;
-		}
-
-		/**isInput
-		 * @param character
-		 * @return true, if character is translatable input, false otherwise
-		 */
-		public static boolean isInput(char character) {
-			return (Character.isDigit(character) || Character.isUpperCase(character) || character == '/');
-		}
-
 }
