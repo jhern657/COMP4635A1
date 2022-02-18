@@ -7,6 +7,8 @@ import java.net.Socket;
  * 
  * @author Matt Smith, Janel Hernandez, Angela Li
  *
+ * This class is the client application that uses a TCP connection to communicate to the server.
+ * The server this client connects with runs a phrase guessing game.
  */
 public class TCPClient {
 
@@ -49,6 +51,8 @@ public class TCPClient {
 				System.out.println("FROM SERVER: " + modifiedSentence);
 				sentence = inFromUser.readLine();
 			}
+			
+			System.out.println("Thanks for playing!");
 
 			clientSocket.close();
 

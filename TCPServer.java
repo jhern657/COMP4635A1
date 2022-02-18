@@ -11,6 +11,11 @@ import java.util.concurrent.Executors;
 
 /**
  * @author Angela Li, Janel Hernandez, Matt Smith
+ * 
+ * This class is the server application that communicates through a TCP connection.
+ * This server can handle multiple clients simultaneously.
+ * 
+ * Runs a phrase guessing game similar to hangman.
  *
  */
 public class TCPServer {
@@ -123,7 +128,7 @@ public class TCPServer {
             } catch (SocketException e) {
                 System.out.println("Error: " + e.getMessage());
             }catch (NullPointerException e) {
-                System.out.println("Game Ended");
+                System.out.println("Client " + clientSocket + " has ended their game.");
             }
             catch (Exception e) {
                 e.printStackTrace();

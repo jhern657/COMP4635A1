@@ -8,6 +8,8 @@ import java.util.Scanner;
 /**
  * 
  * @author Janel Hernandez, Matt Smith, Angela Li
+ * 
+ * This class is for a word guessing game similar to hangman.
  *
  */
 public class Game {
@@ -35,14 +37,11 @@ public class Game {
 
 		phrase = assemble_phrase(level, reader);
 		hidden = hide_phrase(phrase);
-
-		System.out.println(hidden);
-		System.out.println("phrase = " + phrase);
 	}
 
 	//asks for i(level) random words from the word repository,
 	// and concatenates them to create the phrase for a game round
-	public static String assemble_phrase(int level, RandomAccessFile reader) {
+	private static String assemble_phrase(int level, RandomAccessFile reader) {
 
 		Random random = new Random();
 		int randomNum = random.nextInt(NUM_OF_BYTES);
@@ -75,10 +74,9 @@ public class Game {
 	}
 
 	// hide words behind '-' and show failed attempt counter
-	public String hide_phrase(String phrase) {
+	private String hide_phrase(String phrase) {
 
 	    char[] letters = phrase.toCharArray();
-	    System.out.println(phrase);
 	    StringBuilder hidden = new StringBuilder();
 
 	    for (int i=0; i < letters.length; i++) {
@@ -102,7 +100,7 @@ public class Game {
 	}
 
 	// update game counter string value sent to the client
-	public String update_counter(String hidden) {
+	private String update_counter(String hidden) {
 
 	    StringBuilder hidden_copy = new StringBuilder();
 
